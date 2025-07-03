@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { ArrowLeft, FileText, Image, Lock, CheckCircle, XCircle, Clock, User, Phone, Mail, MapPin, Calendar } from 'lucide-react';
 import { toast } from 'sonner';
 import { Application, updateApplicationStatus } from '@/utils/mockDatabase';
+import DocumentViewer from './DocumentViewer';
 
 interface ApplicationDetailProps {
   application: Application;
@@ -18,6 +18,11 @@ interface ApplicationDetailProps {
 const ApplicationDetail: React.FC<ApplicationDetailProps> = ({ application, onBack, isAdmin }) => {
   const [notes, setNotes] = useState(application.notes || '');
   const [processing, setProcessing] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState<{
+    name: string;
+    type: string;
+    password?: string;
+  } | null>(null);
 
   const handleDecision = async (status: 'approved' | 'rejected') => {
     if (!isAdmin) return;
@@ -56,6 +61,10 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({ application, onBa
       default:
         return <Badge variant="secondary">{status}</Badge>;
     }
+  };
+
+  const handleViewDocument = (document: { name: string; type: string; password?: string }) => {
+    setSelectedDocument(document);
   };
 
   return (
@@ -186,7 +195,11 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({ application, onBa
                         </div>
                       )}
                     </div>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewDocument(doc)}
+                    >
                       Lihat
                     </Button>
                   </div>
@@ -278,6 +291,15 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({ application, onBa
           )}
         </div>
       </div>
+
+      {/* Document Viewer Modal */}
+      {selectedDocument && (
+        <DocumentViewer
+          isOpen={!!selectedDocument}
+          onClose={() => setSelectedDocument(null)}
+          document={selectedDocument}
+        />
+      )}
     </div>
   );
 };
